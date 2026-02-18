@@ -1,0 +1,34 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+import joblib
+
+def train_model():
+    data = pd.read_csv("data/processed_data.csv")
+
+    X = data.drop(columns=["rating"])
+    y = data["rating"]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    model = RandomForestRegressor(
+        n_estimators=100,
+        random_state=42,
+        n_jobs=-1
+    )
+
+    model.fit(X_train, y_train)
+
+    preds = model.predict(X_test)
+
+    mse = mean_squared_error(y_test, preds)
+    print("Model MSE:", mse)
+
+    joblib.dump(model, "models/recommender.pkl")
+    print("Model saved!")
+
+if __name__ == "__main__":
+    train_model()

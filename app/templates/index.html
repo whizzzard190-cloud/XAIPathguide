@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>XAI PathGuide</title>
+
+<style>
+body { font-family: Arial; margin: 40px; }
+table { border-collapse: collapse; }
+th, td { padding: 8px 12px; border: 1px solid black; }
+h2 { color: #2c3e50; }
+</style>
+
+</head>
+
+<body>
+
+<h2>XAI–Powered Learning Path Recommendation</h2>
+
+<form method="POST">
+
+<b>Skill Level (1–5):</b>
+<input type="number" name="skill" min="1" max="5" required><br><br>
+
+<b>Goal:</b>
+<select name="goal">
+<option value="data_science">Data Science</option>
+<option value="ai_engineer">AI Engineer</option>
+<option value="web_dev">Web Developer</option>
+</select><br><br>
+
+<b>Preference:</b>
+<select name="preference">
+<option value="python">Python</option>
+<option value="ml">Machine Learning</option>
+<option value="data">Data</option>
+<option value="web">Web</option>
+</select><br><br>
+
+<b>Experience Years:</b>
+<input type="number" name="experience" required><br><br>
+
+<input type="submit" value="Generate Learning Path">
+
+</form>
+
+{% if recommendations is not none %}
+
+<h3>Recommended Learning Path (Top Courses)</h3>
+
+<table>
+<tr>
+<th>Course ID</th>
+<th>Topic</th>
+<th>Difficulty</th>
+<th>Duration (hrs)</th>
+<th>Score</th>
+</tr>
+
+{% for _, row in recommendations.iterrows() %}
+<tr>
+<td>{{row.course_id}}</td>
+<td>{{row.topic}}</td>
+<td>{{row.difficulty}}</td>
+<td>{{row.duration_hours}}</td>
+<td>{{row.score | round(2)}}</td>
+</tr>
+{% endfor %}
+</table>
+
+<br>
+
+<h3>Why These Courses Were Recommended (SHAP Explanation)</h3>
+
+<img src="/static/shap_summary.png" width="700">
+
+<p>
+The SHAP plot shows which learner and course features most influenced the recommendations.
+</p>
+
+{% endif %}
+
+</body>
+</html>

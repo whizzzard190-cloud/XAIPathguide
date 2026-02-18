@@ -1,5 +1,21 @@
 import pandas as pd
 import joblib
+import os
+
+from train_model import train_model
+
+def recommend_courses(learner_profile, top_n=5):
+
+    # Auto train if model missing
+    if not os.path.exists("models/recommender.pkl"):
+        print("Model not found. Training model...")
+        train_model()
+
+    model = joblib.load("models/recommender.pkl")
+
+    le_goal = joblib.load("models/le_goal.pkl")
+    le_preference = joblib.load("models/le_preference.pkl")
+    le_topic = joblib.load("models/le_topic.pkl")
 
 def recommend_courses(learner_profile, top_n=5):
 

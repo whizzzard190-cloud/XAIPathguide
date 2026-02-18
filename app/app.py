@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request
 import sys
 import os
+import shutil
+
 sys.path.append(os.path.abspath("src"))
 
 from recommend import recommend_courses
@@ -31,13 +33,18 @@ def home():
 
             recommendations = recommend_courses(learner)
 
+            # Decode topics
             topic_map = {0: "python", 1: "ml", 2: "data", 3: "web"}
             recommendations["topic"] = recommendations["topic"].map(topic_map)
 
+            # Auto-copy SHAP image if exists
+            if os.path.exists("models/shap_summary.png"):
+                shutil.copy("models/shap_summary.png", "app/static/shap_summary.png")
 
         except Exception as e:
             return f"Input error: {str(e)}"
 
     return render_template("index.html", recommendations=recommendations)
+
 if __name__ == "__main__":
     app.run(debug=True)

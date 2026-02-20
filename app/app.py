@@ -6,6 +6,7 @@ import shutil
 sys.path.append(os.path.abspath("src"))
 
 from recommend import recommend_courses
+from professions import PROFESSION_MAP
 
 app = Flask(__name__)
 
@@ -13,38 +14,59 @@ app = Flask(__name__)
 def home():
 
     recommendations = None
+    xai = {}   # <-- IMPORTANT
 
     if request.method == "POST":
 
         try:
+            # ----------------------------
+            # Read form inputs
+            # ----------------------------
             skill = int(request.form["skill"])
-            goal = request.form["goal"]
-            pref = request.form["preference"]
-
+            profession = request.form["goal"]
             exp_raw = request.form["experience"]
-            exp = int(exp_raw) if exp_raw else 0
+            exp = max(0, int(exp_raw)) if exp_raw else 0
+
+            # ----------------------------
+            # Profession Mapping
+            # ----------------------------
+            mapped = PROFESSION_MAP.get(profession)
+
+            if not mapped:
+                return "Invalid profession selected."
 
             learner = {
                 "skill_level": skill,
-                "goal": goal,
-                "preference": pref,
+                "goal": mapped["goal"],
+                "preference": mapped["preference"],
                 "experience_years": exp
             }
 
+            # ----------------------------
+            # Get recommendations
+            # ----------------------------
             recommendations = recommend_courses(learner)
 
-            # Decode topics
-            topic_map = {0: "python", 1: "ml", 2: "data", 3: "web"}
-            recommendations["topic"] = recommendations["topic"].map(topic_map)
+            # ----------------------------
+            # Get XAI from recommender
+            # ----------------------------
+            xai = recommendations.attrs.get("xai", {})
 
-            # Auto-copy SHAP image if exists
-            if os.path.exists("models/shap_summary.png"):
-                shutil.copy("models/shap_summary.png", "app/static/shap_summary.png")
+            # ----------------------------
+            # Copy SHAP image
+            # ----------------------------
+            if os.path.exists("models/shap_user.png"):
+                shutil.copy("models/shap_user.png", "app/static/shap_user.png")
 
         except Exception as e:
             return f"Input error: {str(e)}"
 
-    return render_template("index.html", recommendations=recommendations)
+    return render_template(
+        "index.html",
+        recommendations=recommendations,
+        xai=xai     # <-- PASSED TO HTML
+    )
+
 
 if __name__ == "__main__":
     app.run(debug=True)

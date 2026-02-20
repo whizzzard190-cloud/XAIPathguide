@@ -1,5 +1,16 @@
+# Virtual environment
 venv/
+
+# Python cache
 __pycache__/
 *.pyc
+
+# Generated ML models
 models/*.pkl
-models/*.png
+
+# Generated explanation images
+app/static/*.png
+
+# OS files
+.DS_Store
+Thumbs.db

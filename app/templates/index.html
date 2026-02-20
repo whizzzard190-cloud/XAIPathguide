@@ -4,80 +4,132 @@
 <title>XAI PathGuide</title>
 
 <style>
-body { font-family: Arial; margin: 40px; }
-table { border-collapse: collapse; }
-th, td { padding: 8px 12px; border: 1px solid black; }
-h2 { color: #2c3e50; }
+body {
+    font-family: Arial;
+    margin: 40px;
+    background-color: #f4f6f9;
+}
+
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 5px 20px rgba(0,0,0,0.1);
+}
+
+button {
+    padding: 10px 20px;
+    background: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+}
+
+th {
+    background-color: #2c3e50;
+    color: white;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
 </style>
 
 </head>
 
 <body>
 
-<h2>XAI–Powered Learning Path Recommendation</h2>
+<div class="container">
+
+<h2>XAI-Powered Learning Path Recommendation</h2>
 
 <form method="POST">
 
-<b>Skill Level (1–5):</b>
+<label>Skill Level (1–5)</label><br>
 <input type="number" name="skill" min="1" max="5" required><br><br>
 
-<b>Goal:</b>
+<label>Profession</label><br>
 <select name="goal">
-<option value="data_science">Data Science</option>
+<option value="data_scientist">Data Scientist</option>
+<option value="ml_engineer">ML Engineer</option>
 <option value="ai_engineer">AI Engineer</option>
-<option value="web_dev">Web Developer</option>
+<option value="web_developer">Web Developer</option>
+<option value="frontend_developer">Frontend Developer</option>
+<option value="backend_developer">Backend Developer</option>
+<option value="fullstack_developer">Fullstack Developer</option>
+<option value="cloud_engineer">Cloud Engineer</option>
+<option value="devops_engineer">DevOps Engineer</option>
+<option value="cybersecurity_analyst">Cybersecurity Analyst</option>
+<option value="data_analyst">Data Analyst</option>
+<option value="business_analyst">Business Analyst</option>
+<option value="software_engineer">Software Engineer</option>
+<option value="mobile_app_developer">Mobile App Developer</option>
+<option value="game_developer">Game Developer</option>
 </select><br><br>
 
-<b>Preference:</b>
-<select name="preference">
-<option value="python">Python</option>
-<option value="ml">Machine Learning</option>
-<option value="data">Data</option>
-<option value="web">Web</option>
-</select><br><br>
-
-<b>Experience Years:</b>
+<label>Experience Years</label><br>
 <input type="number" name="experience" required><br><br>
 
-<input type="submit" value="Generate Learning Path">
+<button type="submit">Generate Learning Path</button>
 
 </form>
 
 {% if recommendations is not none %}
 
-<h3>Recommended Learning Path (Top Courses)</h3>
+<h3>Profession Learning Path</h3>
+<p><b>{{recommendations.attrs.learning_path}}</b></p>
 
 <table>
 <tr>
-<th>Course ID</th>
+<th>Course</th>
 <th>Topic</th>
 <th>Difficulty</th>
-<th>Duration (hrs)</th>
+<th>Duration</th>
 <th>Score</th>
+<th>Reason</th>
+<th>Sources</th>
 </tr>
 
 {% for _, row in recommendations.iterrows() %}
 <tr>
-<td>{{row.course_id}}</td>
+<td>{{row.course_name}}</td>
 <td>{{row.topic}}</td>
 <td>{{row.difficulty}}</td>
 <td>{{row.duration_hours}}</td>
 <td>{{row.score | round(2)}}</td>
+<td>{{row.reason}}</td>
+<td>
+{% for s in row.sources %}
+<a href="{{s.link}}" target="_blank">{{s.name}}</a>
+({{s.type}})
+{% if s.best %}<b>★ Best</b>{% endif %}
+<br>
+{% endfor %}
+</td>
 </tr>
 {% endfor %}
 </table>
 
 <br>
+<h3>Model Explanation (SHAP)</h3>
+<img src="/static/shap_user.png" width="700">
+<h3>Top Factors Influencing This Recommendation</h3>
 
-<h3>Why These Courses Were Recommended (SHAP Explanation)</h3>
-
-<img src="/static/shap_summary.png" width="700">
-
-<p>
-The SHAP plot shows which learner and course features most influenced the recommendations.
-</p>
-
+<ul>
+{% for k,v in xai.items() %}
+<li>{{k}} : {{v | round(3)}}</li>
+{% endfor %}
+</ul>
 {% endif %}
+
+</div>
 
 </body>
 </html>
